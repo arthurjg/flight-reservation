@@ -1,12 +1,10 @@
 package com.bharath.flightreservation.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Entity
@@ -22,5 +20,16 @@ public class Flight {
     private String arrivalCity;
     private Date dateOfDeparture;
     private String estimatedDepartureTime;
+    private Integer capacity;
+
+    @OneToMany(mappedBy = "flight", fetch = FetchType.EAGER)
+    private List<Seat> seats;
+
+    public List<Seat> availableSeats() {
+        return seats
+                .stream()
+                .filter(s -> !s.isOccupied())
+                .toList();
+    }
 
 }

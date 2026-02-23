@@ -4,9 +4,11 @@ import com.bharath.flightreservation.dto.ReservationRequest;
 import com.bharath.flightreservation.entities.Flight;
 import com.bharath.flightreservation.entities.Passenger;
 import com.bharath.flightreservation.entities.Reservation;
+import com.bharath.flightreservation.entities.Seat;
 import com.bharath.flightreservation.repos.FlightRepository;
 import com.bharath.flightreservation.repos.PassengerRepository;
 import com.bharath.flightreservation.repos.ReservationRepository;
+import com.bharath.flightreservation.repos.SeatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +24,11 @@ public class ReservationServiceImpl implements ReservationService {
     @Autowired
     ReservationRepository reservationRepository;
 
+    @Autowired
+    SeatRepository seatRepository;
+
     @Override
-    public Reservation bookFlight(ReservationRequest request) {
+    public synchronized Reservation bookFlight(ReservationRequest request) {
 
         Flight flight =  flightRepository.findById(request.flightId()).get();
 
@@ -36,10 +41,20 @@ public class ReservationServiceImpl implements ReservationService {
 
         Passenger savedPassenger = passengerRepository.save(passenger);
 
-        Reservation reservation = new Reservation(savedPassenger, flight);
+        Seat seat = flight.getSeats()
+                .stream()
+                .filter(s -> s.getSeatNumber().equals(request.seatNumber()) && !s.isOccupied())
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Seat not found/unavailable"));
 
-        Reservation savedReservation = reservationRepository.save(reservation);
+        seat.setOccupied(true);
 
-        return savedReservation;
+        //seatRepository.f
+
+        Seat savedSeat = seatRepository.save(seat);
+
+        Reservation reservation = new Reservation(savedPassenger, flight, seat);
+
+        return reservationRepository.save(reservation);
     }
 }

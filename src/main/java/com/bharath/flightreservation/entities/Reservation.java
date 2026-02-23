@@ -1,9 +1,7 @@
 package com.bharath.flightreservation.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -24,10 +22,14 @@ public class Reservation {
     @ManyToOne
     private Flight flight;
 
-    public Reservation(Passenger passenger, Flight flight) {
+    @ManyToOne
+    private Seat seat;
+
+    public Reservation(Passenger passenger, Flight flight, Seat seat) {
         this.checkedIn = false;
         this.numberOfBags = 0;
         this.passenger = passenger;
         this.flight = flight;
+        this.seat = seat;
     }
 }
